@@ -11,6 +11,7 @@ func Test_TagCache(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	// base use
 	err = c.Put("da", "weisd", 300)
 	if err != nil {
 		t.Fatal(err)
@@ -19,12 +20,12 @@ func Test_TagCache(t *testing.T) {
 	res := c.Get("da")
 
 	if res != "weisd" {
-		t.Fatal("sdf")
+		t.Fatal("base put faield")
 	}
 
 	t.Log("ok")
-	t.Log("test", res)
 
+	// use tags/namespace
 	err = c.Tags([]string{"dd"}).Put("da", "weisd", 300)
 	if err != nil {
 		t.Fatal(err)
@@ -32,18 +33,12 @@ func Test_TagCache(t *testing.T) {
 	res = c.Tags([]string{"dd"}).Get("da")
 
 	if res != "weisd" {
-		t.Fatal("not weisd")
+		t.Fatal("tags put faield")
 	}
 
 	t.Log("ok")
-	t.Log("dd", res)
 
 	err = c.Tags([]string{"aa"}).Put("aa", "aaa", 300)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	err = c.Tags([]string{"aa"}).Put("bb", "bbb", 300)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -55,8 +50,8 @@ func Test_TagCache(t *testing.T) {
 	}
 
 	t.Log("ok")
-	t.Log("aa", res)
 
+	// flush namespace
 	err = c.Tags([]string{"aa"}).Flush()
 	if err != nil {
 		t.Fatal(err)
@@ -72,9 +67,10 @@ func Test_TagCache(t *testing.T) {
 		t.Fatal("flush faield")
 	}
 
+	// still store in
 	res = c.Tags([]string{"dd"}).Get("da")
 	if res != "weisd" {
-		t.Fatal("not weisd")
+		t.Fatal("where ")
 	}
 
 	t.Log("ok")
