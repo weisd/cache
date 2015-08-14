@@ -149,18 +149,41 @@ func (r *RedisCache) startGC() {
 		return
 	}
 
-	kvs, err := redigo.StringMap(r.do("HGETALL", r.key(GC_HASH_KEY)))
+	kvs, err := redigo.Int64Map(r.do("HGETALL", r.key(GC_HASH_KEY)))
 	if err != nil {
 		return
 	}
 
-	for k, v := range kvs {
-		fmt.Println(k)
-		fmt.Println(v)
+	nowUnix := time.Now().Unix()
 
+	outKeys := make([]interface{}, 0)
+
+	for k, v := range kvs {
+		if v == 0 {
+			continue
+		}
+
+		if v < nowUnix {
+			outKeys = append(outKeys, k)
+		}
 	}
 
-	time.AfterFunc(time.Duration(r.interval)*time.Second, func() { c.startGC() })
+	if len(outKeys) > 0 {
+		_, err = r.do("DEL", outKeys...)
+		if err != nil {
+			fmt.Println(err)
+		}
+
+		args := make([]interface{}, len(outKeys)+1)
+		args[0] = r.key(GC_HASH_KEY)
+		copy(args[1:], outKeys)
+		_, err = r.do("HDEL", args...)
+		if err != nil {
+			fmt.Println(err)
+		}
+	}
+
+	time.AfterFunc(time.Duration(r.interval)*time.Second, func() { r.startGC() })
 }
 
 // StartAndGC starts GC routine based on config string settings.

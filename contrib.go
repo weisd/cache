@@ -6,15 +6,21 @@ import (
 
 const EchoCacheStoreKey = "EchoCacheStore"
 
-func Store(c interface{}) Cache {
+func Store(value interface{}) Cache {
+	var cacher Cache
 	switch v := value.(type) {
 	case *echo.Context:
-		cacher := v.Get(EchoCacheStoreKey).(Cache)
+		cacher = v.Get(EchoCacheStoreKey).(Cache)
 		if cacher == nil {
 			panic("EchoStore not found, forget to Use Middleware ?")
 		}
 	default:
+
 		panic("unknown Context")
+	}
+
+	if cacher == nil {
+		panic("cache context not found")
 	}
 
 	return cacher
@@ -28,9 +34,13 @@ func EchoCacher(opt Options) echo.MiddlewareFunc {
 				return err
 			}
 
-			c.Set(EchoCacheStoreKey, EchoCacheStore)
+			c.Set(EchoCacheStoreKey, tagcache)
 
-			h(c)
+			if err = h(c); err != nil {
+				return err
+			}
+
+			return nil
 		}
 	}
 }
