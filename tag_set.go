@@ -5,7 +5,6 @@ import (
 	"encoding/hex"
 	"fmt"
 	"math/rand"
-	"strconv"
 	"strings"
 	"time"
 )
@@ -99,7 +98,7 @@ func (this *TagSet) ResetTag(name string) string {
 
 // id标识算法
 func (this *TagSet) generateId() string {
-	return fmt.Sprintf("%d%d", time.Now().UnixNano(), strconv.Itoa(rand.Intn(9)))
+	return fmt.Sprintf("%d%d", time.Now().UnixNano(), rand.Intn(9))
 }
 
 // Tag key
